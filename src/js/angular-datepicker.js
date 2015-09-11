@@ -39,8 +39,8 @@
           , dateFormat = attr.dateFormat
           , dateMinLimit
           , dateMaxLimit
-          , dateYearFrom = attr.dateYearFrom || 1980
-          , dateYearTo = attr.dateYearTo || 2020
+          , dateYearFrom = Number(attr.dateYearFrom) || 1980
+          , dateYearTo = Number(attr.dateYearTo) || 2020
           , dateDisabledDates = $scope.$eval(attr.dateDisabledDates)
           , date = new Date()
           , currentDay = $filter('date')(date, 'd')
