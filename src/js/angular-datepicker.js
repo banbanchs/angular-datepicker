@@ -55,7 +55,7 @@
           '<a href="javascript:void(0)" ng-click="prevMonth()" title="{{buttonPrevTitle}}">' + prevButton + '</a>' +
           '</div>' +
           '<div class="_720kb-datepicker-calendar-header-middle _720kb-datepicker-calendar-month">' +
-          '{{month}} <a href="javascript:void(0)" ng-click="showYearsPagination = !showYearsPagination"><span>{{year}} <i ng-if="!showYearsPagination">&dtrif;</i> <i ng-if="showYearsPagination">&urtri;</i> </span> </a>' +
+          '<select name="select-year" ng-model="year" ng-options="y for y in yearNumList" ng-change="setNewYear(year)"></select><select name="select-month" ng-model="monthNumber" ng-change="setMonth()" ng-options="m for m in monthNumList"></select>' +
           '</div>' +
           '<div class="_720kb-datepicker-calendar-header-right">' +
           '<a href="javascript:void(0)" ng-click="nextMonth()" title="{{buttonNextTitle}}">' + nextButton + '</a>' +
@@ -102,6 +102,21 @@
         // Respect previously configured interpolation symbols.
         htmlTemplate = htmlTemplate.replace(/{{/g, $interpolate.startSymbol())
             .replace(/}}/g, $interpolate.endSymbol());
+
+        /*
+         * Generate an array which range from `from` to `to`
+         * ie: var a = generateArray(1, 5); // a -> [1, 2, 3, 4, 5]
+         */
+        function generateArray(from, to) {
+          var length = to - from + 1;
+          return Array.apply(0, Array(length)).map(function(_, index) {
+            return from + index;
+          });
+        }
+
+        $scope.monthNumList = generateArray(1, 12);
+
+        $scope.yearNumList = generateArray(1980, 2020);
 
         $scope.$watch('dateSet', function dateSetWatcher(value) {
 
@@ -218,6 +233,22 @@
           $scope.monthNumber = Number($filter('date')(new Date(dateMaxLimit), 'MM'));
           $scope.day = Number($filter('date')(new Date(dateMaxLimit), 'dd'));
           $scope.year = Number($filter('date')(new Date(dateMaxLimit), 'yyyy'));
+        };
+
+        $scope.setMonth = function setMonth() {
+          //set next month
+          $scope.month = $filter('date')(new Date($scope.year, $scope.monthNumber - 1), 'MMMM');
+          //reinit days
+          $scope.setDaysInMonth($scope.monthNumber, $scope.year);
+          if (dateMaxLimit && currentMonthNumber > $scope.monthNumber) {
+            if (!$scope.isSelectableMaxDate($scope.year + '/' + $scope.monthNumber + '/' + $scope.day)) {
+
+              $scope.resetToMaxDate();
+            }
+          }
+          //deactivate selected day
+          $scope.day = undefined;
+
         };
 
         $scope.nextMonth = function manageNextMonth() {
